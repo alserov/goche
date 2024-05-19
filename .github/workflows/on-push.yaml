@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - main
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      env: CI
+    steps:
+      - name: setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.22.0
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: testing
+        run: go test -v ./...
