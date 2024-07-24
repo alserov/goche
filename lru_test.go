@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"math"
 	"testing"
-	"time"
 )
 
 func TestSuiteLRU(t *testing.T) {
@@ -116,19 +115,14 @@ func (s *SuiteLRU) TestExtrusion() {
 		{
 			key: "10",
 		},
-		{
-			key: "11",
-		},
 	}
 
 	for _, tc := range tests {
 		c.Set(context.Background(), tc.key, nil)
 	}
 
-	// giving time to delete least recently used value
-	time.Sleep(time.Millisecond * 10)
-
 	val, ok := c.Get(context.Background(), tests[0].key)
+
 	require.False(s.T(), ok)
 	require.Nil(s.T(), val)
 }
@@ -139,10 +133,6 @@ func (s *SuiteLRU) TestWithLimitMod() {
 	c.Set(context.Background(), "key", 1)
 	c.Set(context.Background(), "key1", 2)
 	c.Set(context.Background(), "key2", 3)
-	c.Set(context.Background(), "key3", 4)
-
-	// giving time to delete least recently used value
-	time.Sleep(time.Millisecond * 10)
 
 	val, ok := c.Get(context.Background(), "key")
 	require.False(s.T(), ok)
@@ -150,19 +140,12 @@ func (s *SuiteLRU) TestWithLimitMod() {
 }
 
 func (s *SuiteLRU) TestReplace() {
-	c := New(LRU, WithLimit(2))
+	c := New(LRU, WithLimit(3))
 
 	c.Set(context.Background(), "key", 1)
-	c.Set(context.Background(), "key1", 2)
-
-	time.Sleep(time.Millisecond * 10)
+	c.Set(context.Background(), "key1", 1)
 	c.Get(context.Background(), "key")
-
-	time.Sleep(time.Millisecond * 10)
-
-	c.Set(context.Background(), "key2", 2)
-
-	time.Sleep(time.Millisecond * 150)
+	c.Set(context.Background(), "key2", 1)
 
 	val, ok := c.Get(context.Background(), "key")
 	require.True(s.T(), ok)

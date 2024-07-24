@@ -60,8 +60,8 @@ type lfu struct {
 	pushCh      chan *lfuNode
 	updatePosCh chan string
 
-	len   uint64
-	limit uint64
+	len   int
+	limit int
 
 	clearPeriod *time.Duration
 }

@@ -4,7 +4,7 @@ import "time"
 
 // Modifiers
 
-func WithLimit(lim uint64) ModifierFunc {
+func WithLimit(lim int) ModifierFunc {
 	return func(cache any) {
 		switch cache.(type) {
 		case *lru:
