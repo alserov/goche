@@ -60,15 +60,19 @@ func (c *lru) Get(ctx context.Context, key string) (any, bool) {
 			c.tail.prev = c.head
 		} else {
 			if val.prev != nil {
-				c.vals[key].prev.next = val.next
+				val.prev.next = val.next
 			}
 			if val.next != nil {
-				c.vals[key].next.prev = val.prev
+				val.next.prev = val.prev
 			}
 
 			if val == c.tail {
 				c.tail = c.tail.prev
 			}
+
+			val.next = c.head
+			c.head.prev = val
+			c.head = val
 		}
 	}
 
