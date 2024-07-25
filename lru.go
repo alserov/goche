@@ -88,9 +88,8 @@ func (c *lru) Set(ctx context.Context, key string, val any) {
 	}
 
 	node := &lruNode{
-		next: c.head,
-		key:  key,
-		val:  val,
+		key: key,
+		val: val,
 	}
 
 	if len(c.vals) == 0 {
@@ -98,6 +97,11 @@ func (c *lru) Set(ctx context.Context, key string, val any) {
 	}
 
 	c.vals[key] = node
+
+	if c.head != nil {
+		c.head.prev = node
+	}
+	node.next = c.head
 	c.head = node
 
 	if len(c.vals) == c.limit {
