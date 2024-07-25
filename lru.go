@@ -46,37 +46,44 @@ func (c *lru) Close() {
 // Get retrieves value by its id, returns false if not found
 func (c *lru) Get(ctx context.Context, key string) (any, bool) {
 	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	val, ok := c.vals[key]
 	if !ok {
 		return nil, false
 	}
 
-	if len(c.vals) == 2 {
-		c.head, c.tail = c.tail, c.head
-		c.head.next = c.tail
-		c.tail.prev = c.head
-	} else {
-		if val.prev != nil {
-			c.vals[key].prev.next = c.vals[key].next
-		}
-
-		if val.next != nil {
-			c.vals[key].next.prev = c.vals[key].prev
+	if val != c.head {
+		if len(c.vals) == 2 {
+			c.head, c.tail = c.tail, c.head
+			c.head.next = c.tail
+			c.tail.prev = c.head
 		} else {
-			if c.tail != nil {
+			if val.prev != nil {
+				c.vals[key].prev.next = val.next
+			}
+			if val.next != nil {
+				c.vals[key].next.prev = val.prev
+			}
+
+			if val == c.tail {
 				c.tail = c.tail.prev
 			}
 		}
 	}
-	c.mu.RUnlock()
 
 	return val.val, true
 }
 
 func (c *lru) Set(ctx context.Context, key string, val any) {
 	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if _, ok := c.vals[key]; ok {
+		return
+	}
+
 	node := &lruNode{
-		prev: nil,
 		next: c.head,
 		key:  key,
 		val:  val,
@@ -87,13 +94,14 @@ func (c *lru) Set(ctx context.Context, key string, val any) {
 	}
 
 	c.vals[key] = node
-	c.head = c.vals[key]
+	c.head = node
 
 	if len(c.vals) == c.limit {
 		if c.tail != nil {
 			delete(c.vals, c.tail.key)
 			c.tail = c.tail.prev
+		} else {
+			c.head = nil
 		}
 	}
-	c.mu.Unlock()
 }

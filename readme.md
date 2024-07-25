@@ -31,7 +31,7 @@ func main() {
 ```text
 cpu: Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz
 BenchmarkLRUGet
-BenchmarkLRUGet-12      137647732                8.623 ns/op
+BenchmarkLRUGet-12      70945466                16.89 ns/op
 ```
 
 
@@ -39,7 +39,7 @@ BenchmarkLRUGet-12      137647732                8.623 ns/op
 ```text
 cpu: Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz
 BenchmarkLRUSet
-BenchmarkLRUSet-12      11138575                97.77 ns/op
+BenchmarkLRUSet-12      40799257                29.68 ns/op
 ```
 
 ### LFU
