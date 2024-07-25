@@ -46,12 +46,20 @@ func (c *lru) Close() {
 // Get retrieves value by its id, returns false if not found
 func (c *lru) Get(ctx context.Context, key string) (any, bool) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	val, ok := c.vals[key]
-	if !ok {
-		return nil, false
+	c.mu.RUnlock()
+
+	if ok {
+		c.updatePos(val)
+		return val.val, true
 	}
+
+	return nil, false
+}
+
+func (c *lru) updatePos(val *lruNode) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if val != c.head {
 		if len(c.vals) == 2 {
@@ -75,13 +83,11 @@ func (c *lru) Get(ctx context.Context, key string) (any, bool) {
 			c.head = val
 		}
 	}
-
-	return val.val, true
 }
 
 func (c *lru) Set(ctx context.Context, key string, val any) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	if _, ok := c.vals[key]; ok {
 		return
